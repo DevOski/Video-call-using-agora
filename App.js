@@ -1,5 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {PermissionsAndroid, Platform} from 'react-native';
 import {
   ClientRoleType,
@@ -10,9 +17,12 @@ import {
 } from 'react-native-agora';
 
 const appId = '270b512970864b0a93b14650e52e8f9c';
-const channelName = 'testing video call';
-const token = 'c39ea4bfffcb42c2aac39fb817043822';
+const channelName = 'testing';
+const token =
+  '007eJxTYNg2V6JEiW/n7HWznF+Hpi35o9+7wk5R0su3WWvToQ2lpRUKDEbmBkmmhkaW5gYWZiZJBomWxkmGJmamBqmmRqkWaZbJR018k1cEMjIcDpnHxMgAgSA+O0NJanFJZl46AwMARKgfeQ==';
 const uid = 0;
+
+const {width, height} = Dimensions.get('window');
 
 export default function App() {
   const agoraEngineRef = useRef(); // Agora engine instance
@@ -39,60 +49,62 @@ export default function App() {
 
   const setupVideoSDKEngine = async () => {
     try {
-    // use the helper function to get permissions
-    await getPermission();
-    agoraEngineRef.current = createAgoraRtcEngine();
-    const agoraEngine = agoraEngineRef.current;
-    agoraEngine.registerEventHandler({
+      // use the helper function to get permissions
+      await getPermission();
+      agoraEngineRef.current = createAgoraRtcEngine();
+      const agoraEngine = agoraEngineRef.current;
+      agoraEngine.registerEventHandler({
         onJoinChannelSuccess: () => {
-            showMessage('Successfully joined the channel ' + channelName);
-            setIsJoined(true);
+          showMessage('Successfully joined the channel ' + channelName);
+          setIsJoined(true);
         },
         onUserJoined: (_connection, Uid) => {
-            showMessage('Remote user joined with uid ' + Uid);
-            setRemoteUid(Uid);
+          showMessage('Remote user joined with uid ' + Uid);
+          setRemoteUid(Uid);
         },
         onUserOffline: (_connection, Uid) => {
-            showMessage('Remote user left the channel. uid: ' + Uid);
-            setRemoteUid(0);
+          showMessage('Remote user left the channel. uid: ' + Uid);
+          setRemoteUid(0);
         },
-    });
-    agoraEngine.initialize({
+      });
+      agoraEngine.initialize({
         appId: appId,
-    });
-    agoraEngine.enableVideo();
+      });
+      agoraEngine.enableVideo();
     } catch (e) {
-        console.log(e);
+      console.log(e);
     }
- };
+  };
 
- const join = async () => {
-   if (isJoined) {
-     return;
+  const join = async () => {
+    if (isJoined) {
+      return;
     }
     try {
       agoraEngineRef.current?.setChannelProfile(
-          ChannelProfileType.ChannelProfileCommunication,
+        ChannelProfileType.ChannelProfileCommunication,
       );
+
       agoraEngineRef.current?.startPreview();
       agoraEngineRef.current?.joinChannel(token, channelName, uid, {
-          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
       });
-  } catch (e) {
+      console.log('work---->>', token, channelName, uid);
+    } catch (e) {
       console.log(e);
-  }
-};
+    }
+  };
 
-const leave = () => {
-  try {
+  const leave = () => {
+    try {
       agoraEngineRef.current?.leaveChannel();
       setRemoteUid(0);
       setIsJoined(false);
       showMessage('You left the channel');
-  } catch (e) {
+    } catch (e) {
       console.log(e);
-  }
-};
+    }
+  };
 
   return (
     <SafeAreaView style={styles.main}>
@@ -108,26 +120,31 @@ const leave = () => {
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContainer}>
-        {isJoined ? (
-          <React.Fragment key={0}>
-            <RtcSurfaceView canvas={{uid: 0}} style={styles.videoView} />
-            <Text>Local user uid: {uid}</Text>
-          </React.Fragment>
-        ) : (
-          <Text>Join a channel</Text>
-        )}
+     
         {isJoined && remoteUid !== 0 ? (
           <React.Fragment key={remoteUid}>
             <RtcSurfaceView
               canvas={{uid: remoteUid}}
               style={styles.videoView}
             />
-            <Text>Remote user uid: {remoteUid}</Text>
+            {/* <Text>Remote user uid: {remoteUid}</Text> */}
           </React.Fragment>
         ) : (
-          <Text>Waiting for a remote user to join</Text>
+          <></>
+
+          // <Text>Waiting for a remote user to join</Text>
         )}
-        <Text style={styles.info}>{message}</Text>
+        {/* <Text style={styles.info}>{message}</Text> */}
+        {isJoined ? (
+          <React.Fragment key={0}>
+            <RtcSurfaceView canvas={{uid: 0}} style={styles.videoView1} />
+            {/* </View> */}
+            {/* <Text>Local user uid: {uid}</Text> */}
+          </React.Fragment>
+        ) : (
+          <></>
+          // <Text>Join a channel</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,10 +160,22 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   main: {flex: 1, alignItems: 'center'},
-  scroll: {flex: 1, backgroundColor: '#ddeeff', width: '100%'},
+  scroll: {
+    flex: 1,
+    backgroundColor: '#ddeeff',
+    width: '100%',
+    position: 'relative',
+  },
   scrollContainer: {alignItems: 'center'},
-  videoView: {width: '90%', height: 200},
+  videoView: {width: '100%', height: height * 0.5, top: 10},
   btnContainer: {flexDirection: 'row', justifyContent: 'center'},
   head: {fontSize: 20},
   info: {backgroundColor: '#ffffe0', color: '#0000ff'},
+  videoView1: {
+    width: width * 0.5,
+    height: height * 0.25,
+    // top: 380,
+    // right: 20,
+    // position: 'absolute',
+  },
 });
