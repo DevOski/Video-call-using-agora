@@ -1,152 +1,39 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {PermissionsAndroid, Platform} from 'react-native';
-import {
-  ClientRoleType,
-  createAgoraRtcEngine,
-  IRtcEngine,
-  RtcSurfaceView,
-  ChannelProfileType,
-} from 'react-native-agora';
+import * as React from 'react';
+import AgoraUIKit from 'agora-rn-uikit';
+// import { RtcL } from "react-native-agora"
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View } from 'react-native';
 
-const appId = '270b512970864b0a93b14650e52e8f9c';
-const channelName = 'testing video call';
-const token = 'c39ea4bfffcb42c2aac39fb817043822';
-const uid = 0;
-
-export default function App() {
-  const agoraEngineRef = useRef(); // Agora engine instance
-  const [isJoined, setIsJoined] = useState(false); // Indicates if the local user has joined the channel
-  const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
-  const [message, setMessage] = useState(''); //
-
-  const showMessage = msg => {
-    setMessage(msg);
+const App = () => {
+  const [videoCall, setVideoCall] = React.useState(true);
+  const connectionData = {
+    appId: 'e15a674158ce47bd987300e6699767af',
+    channel: 'channelName',
+    cert: "b9c6458c78fa419bbe6588ab2360672d",
+    token: "c39ea4bfffcb42c2aac39fb817043822"
   };
-
-  const getPermission = async () => {
-    if (Platform.OS === 'android') {
-      await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-      ]);
-    }
+  const rtcCallbacks = {
+    EndCall: () => setVideoCall(false),
   };
-
-  useEffect(() => {
-    setupVideoSDKEngine();
-  }, []);
-
-  const setupVideoSDKEngine = async () => {
-    try {
-    // use the helper function to get permissions
-    await getPermission();
-    agoraEngineRef.current = createAgoraRtcEngine();
-    const agoraEngine = agoraEngineRef.current;
-    agoraEngine.registerEventHandler({
-        onJoinChannelSuccess: () => {
-            showMessage('Successfully joined the channel ' + channelName);
-            setIsJoined(true);
-        },
-        onUserJoined: (_connection, Uid) => {
-            showMessage('Remote user joined with uid ' + Uid);
-            setRemoteUid(Uid);
-        },
-        onUserOffline: (_connection, Uid) => {
-            showMessage('Remote user left the channel. uid: ' + Uid);
-            setRemoteUid(0);
-        },
-    });
-    agoraEngine.initialize({
-        appId: appId,
-    });
-    agoraEngine.enableVideo();
-    } catch (e) {
-        console.log(e);
-    }
- };
-
- const join = async () => {
-   if (isJoined) {
-     return;
-    }
-    try {
-      agoraEngineRef.current?.setChannelProfile(
-          ChannelProfileType.ChannelProfileCommunication,
-      );
-      agoraEngineRef.current?.startPreview();
-      agoraEngineRef.current?.joinChannel(token, channelName, uid, {
-          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-      });
-  } catch (e) {
-      console.log(e);
-  }
-};
-
-const leave = () => {
-  try {
-      agoraEngineRef.current?.leaveChannel();
-      setRemoteUid(0);
-      setIsJoined(false);
-      showMessage('You left the channel');
-  } catch (e) {
-      console.log(e);
-  }
-};
-
   return (
-    <SafeAreaView style={styles.main}>
-      <Text style={styles.head}>Agora Video Calling Quickstart</Text>
-      <View style={styles.btnContainer}>
-        <Text onPress={join} style={styles.button}>
-          Join
-        </Text>
-        <Text onPress={leave} style={styles.button}>
-          Leave
-        </Text>
-      </View>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContainer}>
-        {isJoined ? (
-          <React.Fragment key={0}>
-            <RtcSurfaceView canvas={{uid: 0}} style={styles.videoView} />
-            <Text>Local user uid: {uid}</Text>
-          </React.Fragment>
-        ) : (
-          <Text>Join a channel</Text>
-        )}
-        {isJoined && remoteUid !== 0 ? (
-          <React.Fragment key={remoteUid}>
-            <RtcSurfaceView
-              canvas={{uid: remoteUid}}
-              style={styles.videoView}
-            />
-            <Text>Remote user uid: {remoteUid}</Text>
-          </React.Fragment>
-        ) : (
-          <Text>Waiting for a remote user to join</Text>
-        )}
-        <Text style={styles.info}>{message}</Text>
-      </ScrollView>
-    </SafeAreaView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {videoCall ? (
+        <View>
+          <AgoraUIKit
+            connectionData={{
+              appId: "e15a674158ce47bd987300e6699767af",
+              channel: "channelName",
+              rtcToken:"007eJxTYLC8M213lPKc67OkZikXXdn4e9tbl+bA+wxmd+8kcd56zCGvwJBqaJpoZm5iaGqRnGpinpRiaWFubGCQamZmaWluZp6Ydr7SL7khkJHhcKYhIyMDBIL43AzJGYl5eak5fom5qQwMAHtYIoM=",
+              rtmToken:"b9c6458c78fa419bbe6588ab2360672d",
+              username: `Haris${Math.random()}`
+            }}
+            rtcCallbacks={rtcCallbacks} />
+        </View>
+      ) : (
+        <Text onPress={() => setVideoCall(true)}>Start Call</Text>
+      )}
+    </GestureHandlerRootView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  button: {
-    paddingHorizontal: 25,
-    paddingVertical: 4,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    backgroundColor: '#0055cc',
-    margin: 5,
-  },
-  main: {flex: 1, alignItems: 'center'},
-  scroll: {flex: 1, backgroundColor: '#ddeeff', width: '100%'},
-  scrollContainer: {alignItems: 'center'},
-  videoView: {width: '90%', height: 200},
-  btnContainer: {flexDirection: 'row', justifyContent: 'center'},
-  head: {fontSize: 20},
-  info: {backgroundColor: '#ffffe0', color: '#0000ff'},
-});
+export default App;
