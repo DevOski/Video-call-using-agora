@@ -19,7 +19,7 @@ import {
 const appId = '270b512970864b0a93b14650e52e8f9c';
 const channelName = 'testing';
 const token =
-  '007eJxTYNg2V6JEiW/n7HWznF+Hpi35o9+7wk5R0su3WWvToQ2lpRUKDEbmBkmmhkaW5gYWZiZJBomWxkmGJmamBqmmRqkWaZbJR018k1cEMjIcDpnHxMgAgSA+O0NJanFJZl46AwMARKgfeQ==';
+  '007eJxTYDjKaqESnVGwMHX69WCl+lUl+5I1GfYsFFlwetVlaX7nt0YKDEbmBkmmhkaW5gYWZiZJBomWxkmGJmamBqmmRqkWaZbJ66/5J68KZGSoZPnOzMgAgSA+O0NJanFJZl46AwMABjse/w=='
 const uid = 0;
 
 const {width, height} = Dimensions.get('window');
@@ -118,34 +118,29 @@ export default function App() {
         </Text>
       </View>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContainer}>
-     
-        {isJoined && remoteUid !== 0 ? (
-          <React.Fragment key={remoteUid}>
-            <RtcSurfaceView
-              canvas={{uid: remoteUid}}
-              style={styles.videoView}
-            />
-            {/* <Text>Remote user uid: {remoteUid}</Text> */}
-          </React.Fragment>
-        ) : (
-          <></>
-
-          // <Text>Waiting for a remote user to join</Text>
-        )}
-        {/* <Text style={styles.info}>{message}</Text> */}
-        {isJoined ? (
-          <React.Fragment key={0}>
-            <RtcSurfaceView canvas={{uid: 0}} style={styles.videoView1} />
-            {/* </View> */}
-            {/* <Text>Local user uid: {uid}</Text> */}
-          </React.Fragment>
-        ) : (
-          <></>
-          // <Text>Join a channel</Text>
-        )}
-      </ScrollView>
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContainer}>
+            {isJoined ? (
+                <React.Fragment key={0}>
+                <RtcSurfaceView canvas={{uid: 0}} style={styles.videoView} />
+                <Text>Local user uid: {uid}</Text>
+                </React.Fragment>
+            ) : (
+                <Text>Join a channel</Text>
+            )}
+            {isJoined && remoteUid !== 0 ? (
+                <React.Fragment key={remoteUid}>
+                <RtcSurfaceView
+                    canvas={{uid: remoteUid}}
+                    style={styles.videoView}
+                />
+                <Text>Remote user uid: {remoteUid}</Text>
+                </React.Fragment>
+            ) : (
+                <Text>Waiting for a remote user to join</Text>
+            )}
+            <Text style={styles.info}>{message}</Text>
+        </ScrollView>
     </SafeAreaView>
   );
 }
@@ -167,15 +162,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   scrollContainer: {alignItems: 'center'},
-  videoView: {width: '100%', height: height * 0.5, top: 10},
+  videoView: {width: '90%', height: 200},
   btnContainer: {flexDirection: 'row', justifyContent: 'center'},
   head: {fontSize: 20},
   info: {backgroundColor: '#ffffe0', color: '#0000ff'},
-  videoView1: {
-    width: width * 0.5,
-    height: height * 0.25,
-    // top: 380,
-    // right: 20,
-    // position: 'absolute',
-  },
+  
 });
